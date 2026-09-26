@@ -13,44 +13,37 @@
         #login-screen button { padding: 12px 30px; font-size: 18px; cursor: pointer; border-radius: 8px; border: none; background: var(--gold); color: #fff; font-weight: bold; transition: 0.3s; }
         #login-screen button:hover { background: #b5952f; }
         
-        #dashboard { display: none; padding: 20px; max-width: 1200px; margin: auto; position: relative; }
+        #dashboard { display: none; padding: 20px; max-width: 1200px; margin: auto; }
         .header-img { width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px; object-fit: contain; background: white;}
         .search-container { position: relative; margin-bottom: 20px; }
         .search-bar { width: 100%; padding: 15px; font-size: 18px; border-radius: 8px; border: 2px solid #ddd; box-sizing: border-box; outline: none; transition: 0.3s;}
         .search-bar:focus { border-color: var(--gold); }
         
-        .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative;}
-        .filters button { padding: 8px 16px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; position: relative; }
+        .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .filters button { padding: 8px 16px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .filters button:hover, .filters button.active { background: var(--primary); color: white; }
         .filters button.special { background: var(--gold); color: white; }
         
-        /* تصميم القائمة المنبثقة (التول تيب) عند الوقوف */
-        #info-tooltip {
-            display: none;
-            position: absolute;
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            z-index: 100;
-            width: 260px;
-            text-align: right;
-        }
-        .tooltip-header { font-size: 16px; font-weight: bold; color: var(--primary); border-bottom: 2px solid var(--gold); padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .tooltip-list { list-style: none; padding: 0; margin: 0 0 15px 0; max-height: 200px; overflow-y: auto; font-size: 14px; color: #4b5563; }
-        .tooltip-list li { padding: 5px 0; border-bottom: 1px dashed #f3f4f6; }
-        .tooltip-list li:last-child { border-bottom: none; }
-        .tooltip-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .tooltip-btn:hover { background: #152b69; }
+        /* لوحة الملخص الاحترافية */
+        #summary-panel { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); margin-bottom: 25px; border-top: 4px solid var(--primary); animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .summary-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 15px; margin-bottom: 15px; }
+        .summary-header h2 { margin: 0; color: var(--primary); font-size: 22px; }
+        .summary-count { background: var(--gold); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 16px; }
+        .summary-list { list-style: none; padding: 0; margin: 0; max-height: 350px; overflow-y: auto; }
+        .summary-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 10px; border-bottom: 1px solid #f3f4f6; transition: 0.2s; font-size: 16px; color: #1f2937; }
+        .summary-list li:hover { background: #f9fafb; border-radius: 6px; }
+        .summary-list li:last-child { border-bottom: none; }
+        .btn-detail { background: #e5e7eb; color: #374151; border: none; padding: 6px 15px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
+        .btn-detail:hover { background: var(--primary); color: white; }
+        .btn-show-all { display: block; width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-size: 16px; font-weight: bold; margin-top: 20px; cursor: pointer; transition: 0.2s; }
+        .btn-show-all:hover { background: #152b69; }
 
+        /* البطاقات */
         .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid var(--gold); transition: transform 0.2s; }
         .card:hover { transform: translateY(-5px); }
-        
-        /* تلوين بطاقات الأمراض المزمنة بلون مميز */
         .card.chronic-card { background-color: #fef2f2; border-top: 5px solid #ef4444; }
-        
         .card h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 20px; }
         .card p { margin: 6px 0; color: #4b5563; font-size: 14px; border-bottom: 1px solid #f3f4f6; padding-bottom: 5px;}
         .card p:last-child { border-bottom: none; }
@@ -77,45 +70,43 @@
         <img src="https://i.postimg.cc/K88X7RLb/trwysyh-dhhbyt.png" alt="ترويسة مدرسة البلاد القديم" class="header-img">
         
         <div class="search-container">
-            <input type="text" id="search" class="search-bar" placeholder="ابحث بالحروف الأولى أو أي جزء من اسم الموظف..." onkeyup="filterData()">
+            <input type="text" id="search" class="search-bar" placeholder="ابحث باسم الموظف لعرض التفاصيل مباشرة..." onkeyup="handleSearch()">
         </div>
 
         <div class="filters" id="filter-container">
-            <button id="btn-all" data-type="all" data-value="all" class="active" onclick="applyFilter('all', '', this)">الكل</button>
-            <button id="btn-math" data-type="subject" data-value="الرياضيات" onclick="applyFilter('subject', 'الرياضيات', this)">الرياضيات</button>
-            <button id="btn-sci" data-type="subject" data-value="العلوم" onclick="applyFilter('subject', 'العلوم', this)">العلوم</button>
-            <button id="btn-eng" data-type="subject" data-value="اللغة الإنجليزية" onclick="applyFilter('subject', 'اللغة الإنجليزية', this)">الإنجليزي</button>
-            <button id="btn-ara" data-type="subject" data-value="اللغة العربية" onclick="applyFilter('subject', 'اللغة العربية', this)">العربي</button>
-            <button id="btn-isl" data-type="subject" data-value="التربية الإسلامية" onclick="applyFilter('subject', 'التربية الإسلامية', this)">إسلاميات</button>
-            <button id="btn-prac" data-type="subject" data-value="المجالات العملية" onclick="applyFilter('subject', 'المجالات العملية', this)">المجالات</button>
-            <button id="btn-soc" data-type="subject" data-value="المواد الاجتماعية" onclick="applyFilter('subject', 'المواد الاجتماعية', this)">اجتماعيات</button>
-            <button id="btn-pe" data-type="subject" data-value="التربية الرياضية" onclick="applyFilter('subject', 'التربية الرياضية', this)">الرياضة</button>
-            <button id="btn-spec" data-type="subject" data-value="تربية خاصة" onclick="applyFilter('subject', 'تربية خاصة', this)">تربية خاصة</button>
-            <button id="btn-admin" data-type="subject" data-value="مدير" onclick="applyFilter('subject', 'مدير', this)">الإدارة المدرسية</button>
-            <button id="btn-senior" data-type="senior" data-value="معلم أول" onclick="applyFilter('senior', 'معلم أول', this)" class="special">المعلمين الأوائل</button>
-            <button id="btn-bah" data-type="type" data-value="بحريني" onclick="applyFilter('type', 'بحريني', this)" class="special">البحرينيين</button>
-            <button id="btn-exp" data-type="type" data-value="وافد" onclick="applyFilter('type', 'وافد', this)" class="special">الوافدين</button>
-            <button id="btn-dis" data-type="disease" data-value="نعم" onclick="applyFilter('disease', 'نعم', this)" class="special">الأمراض المزمنة</button>
+            <button class="active" onclick="applyFilter('all', 'الكل', this)">الكل</button>
+            <button onclick="applyFilter('subject', 'الرياضيات', this)">الرياضيات</button>
+            <button onclick="applyFilter('subject', 'العلوم', this)">العلوم</button>
+            <button onclick="applyFilter('subject', 'اللغة الإنجليزية', this)">الإنجليزي</button>
+            <button onclick="applyFilter('subject', 'اللغة العربية', this)">العربي</button>
+            <button onclick="applyFilter('subject', 'التربية الإسلامية', this)">إسلاميات</button>
+            <button onclick="applyFilter('subject', 'المجالات العملية', this)">المجالات</button>
+            <button onclick="applyFilter('subject', 'المواد الاجتماعية', this)">اجتماعيات</button>
+            <button onclick="applyFilter('subject', 'التربية الرياضية', this)">الرياضة</button>
+            <button onclick="applyFilter('subject', 'تربية خاصة', this)">تربية خاصة</button>
+            <button onclick="applyFilter('subject', 'مدير', this)">الإدارة المدرسية</button>
+            <button onclick="applyFilter('senior', 'معلم أول', this)" class="special">المعلمين الأوائل</button>
+            <button onclick="applyFilter('type', 'بحريني', this)" class="special">البحرينيين</button>
+            <button onclick="applyFilter('type', 'وافد', this)" class="special">الوافدين</button>
+            <button onclick="applyFilter('disease', 'نعم', this)" class="special">الأمراض المزمنة</button>
         </div>
 
-        <!-- أداة التلميح (النافذة المنبثقة عند الوقوف) -->
-        <div id="info-tooltip"></div>
+        <!-- لوحة الملخص الجديدة -->
+        <div id="summary-panel"></div>
 
         <div id="loader">جاري تحميل وتحديث البيانات...</div>
         <div id="cards-container" class="cards-grid"></div>
     </div>
 
     <script>
-    // الرابط الوزاري الخاص بك
     const API_URL = "https://script.google.com/macros/s/AKfycbzN7GQkCewxmCiPM5s6Hk3V5KZF1hR07CIHm6KGpF6XO-H5c2_Bc7kGBQ4Rzg13SV_I/exec"; 
     
     let allData = [];
-    let currentFilter = { type: 'all', value: '' };
-    let hideTimeout; // للتحكم في اختفاء القائمة
+    let currentFilteredData = [];
+    let currentFilterTitle = "";
 
     function checkPassword() {
-        const pass = document.getElementById("pass-input").value;
-        if (pass === "2030") {
+        if (document.getElementById("pass-input").value === "2030") {
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("dashboard").style.display = "block";
             fetchData();
@@ -128,18 +119,132 @@
         try {
             const response = await fetch(API_URL, { method: "GET", redirect: "follow" });
             allData = await response.json();
+            
+            // إضافة معرف فريد (index) لكل صف لتسهيل استدعاء البطاقة الفردية
+            allData.forEach((row, index) => row.originalIndex = index);
+            
             document.getElementById("loader").style.display = "none";
-            renderCards(allData);
-            attachHoverEvents(); // تفعيل ميزة الوقوف على الأزرار بعد جلب البيانات
+            
+            // عرض الكل افتراضياً عند الدخول
+            currentFilteredData = allData;
+            renderCards(currentFilteredData);
         } catch (error) {
             document.getElementById("loader").innerText = "حدث خطأ في تحميل البيانات.";
-            console.error(error);
         }
     }
 
+    function applyFilter(filterType, filterValue, btnElement) {
+        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+        
+        document.getElementById("search").value = ""; // تفريغ البحث عند استخدام الفلاتر
+        
+        if (filterType === 'all') {
+            document.getElementById("summary-panel").style.display = "none";
+            currentFilteredData = allData;
+            renderCards(currentFilteredData);
+            return;
+        }
+
+        currentFilterTitle = btnElement ? btnElement.innerText : filterValue;
+
+        // تصفية البيانات
+        currentFilteredData = allData.filter(row => {
+            const subject = (row["Subject"] || "");
+            const type = (row["النوع_المرتب"] || "");
+            const job = (row["الوظيفة"] || "");
+            const hasDisease = (row["هل لديك أمراض مزمنة؟"] && row["هل لديك أمراض مزمنة؟"].trim() === "نعم");
+
+            if (filterType === 'subject') return subject.includes(filterValue);
+            if (filterType === 'type') return type === filterValue;
+            if (filterType === 'senior') return job.includes('معلم أول') || job.includes('منسق');
+            if (filterType === 'disease') return hasDisease;
+            return true;
+        });
+
+        renderSummaryPanel();
+    }
+
+    // بناء لوحة الملخص
+    function renderSummaryPanel() {
+        const panel = document.getElementById("summary-panel");
+        const cardsContainer = document.getElementById("cards-container");
+        
+        cardsContainer.innerHTML = ""; // إخفاء البطاقات مؤقتاً
+
+        let html = `
+            <div class="summary-header">
+                <h2>${currentFilterTitle}</h2>
+                <span class="summary-count">العدد: ${currentFilteredData.length}</span>
+            </div>
+            <ul class="summary-list">
+        `;
+
+        currentFilteredData.forEach(row => {
+            const name = row["اسم المعلم/الموظف باللغة العربية"] || row["TeacherName"] || "بدون اسم";
+            html += `
+                <li>
+                    <span>${name}</span>
+                    <button class="btn-detail" onclick="renderSingleCard(${row.originalIndex})">عرض التفاصيل</button>
+                </li>
+            `;
+        });
+
+        html += `
+            </ul>
+            <button class="btn-show-all" onclick="renderCards(currentFilteredData)">عرض الكل</button>
+        `;
+
+        panel.innerHTML = html;
+        panel.style.display = "block";
+    }
+
+    // عرض بطاقة واحدة فقط لمعلم محدد
+    function renderSingleCard(index) {
+        const singleData = allData.filter(row => row.originalIndex === index);
+        document.getElementById("summary-panel").style.display = "none";
+        renderCards(singleData);
+    }
+
+    // دالة البحث المباشر السريعة
+    function handleSearch() {
+        const searchTerm = document.getElementById("search").value.toLowerCase();
+        
+        if (searchTerm === "") {
+            document.getElementById("summary-panel").style.display = "none";
+            renderCards(allData);
+            document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+            document.querySelector('.filters button').classList.add('active'); // إعادة تفعيل زر الكل
+            return;
+        }
+
+        document.getElementById("summary-panel").style.display = "none";
+        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+
+        const filtered = allData.filter(row => {
+            const name = (row["اسم المعلم/الموظف باللغة العربية"] || row["TeacherName"] || "").toLowerCase();
+            return name.includes(searchTerm);
+        });
+
+        renderCards(filtered);
+    }
+
+    // رسم البطاقات في الواجهة
     function renderCards(data) {
+        const panel = document.getElementById("summary-panel");
         const container = document.getElementById("cards-container");
+        
+        // إخفاء لوحة الملخص عند عرض البطاقات
+        if(data.length === currentFilteredData.length && data.length > 1) {
+             panel.style.display = "none";
+        }
+        
         container.innerHTML = "";
+        
+        if(data.length === 0) {
+            container.innerHTML = `<h3 style="color:#6b7280; text-align:center; width:100%; grid-column: 1 / -1;">لا توجد بيانات مطابقة</h3>`;
+            return;
+        }
         
         data.forEach(row => {
             const name = row["اسم المعلم/الموظف باللغة العربية"] || row["TeacherName"] || "بدون اسم";
@@ -151,14 +256,11 @@
             const phone = row["رقم الاتصال"] || "-";
             const degree = row["المؤهل الأكاديمي"] || "-";
             
-            // إصلاح مشكلة الأمراض المزمنة
             const hasDiseaseRaw = row["هل لديك أمراض مزمنة؟"];
             const hasDisease = (hasDiseaseRaw && hasDiseaseRaw.trim() === "نعم") ? true : false;
             const diseaseDetails = row["ما هو المرض مزمن"] || row["ماهو المرض المزمن؟"] || "";
 
             const card = document.createElement("div");
-            
-            // إضافة كلاس خاص لتمييز بطاقات المرضى بلون خفيف
             card.className = hasDisease ? "card chronic-card" : "card";
             
             let badgesHTML = `<span class="badge bg-blue">${subject}</span>`;
@@ -177,111 +279,6 @@
                 ${hasDisease ? `<p style="color:#dc2626;"><strong>تفاصيل المرض:</strong> ${diseaseDetails}</p>` : ''}
             `;
             container.appendChild(card);
-        });
-    }
-
-    function applyFilter(filterType, filterValue, btnElement) {
-        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
-        if(btnElement) btnElement.classList.add('active');
-        
-        currentFilter = { type: filterType, value: filterValue };
-        filterData(); 
-    }
-
-    function filterData() {
-        const searchTerm = document.getElementById("search").value.toLowerCase();
-        
-        const filtered = allData.filter(row => {
-            const name = (row["اسم المعلم/الموظف باللغة العربية"] || row["TeacherName"] || "").toLowerCase();
-            const subject = (row["Subject"] || "");
-            const type = (row["النوع_المرتب"] || "");
-            const job = (row["الوظيفة"] || "");
-            
-            const hasDiseaseRaw = row["هل لديك أمراض مزمنة؟"];
-            const hasDisease = (hasDiseaseRaw && hasDiseaseRaw.trim() === "نعم");
-            
-            const matchSearch = name.includes(searchTerm);
-            
-            let matchButton = true;
-            if (currentFilter.type === 'subject') {
-                matchButton = subject.includes(currentFilter.value);
-            } else if (currentFilter.type === 'type') {
-                matchButton = type === currentFilter.value;
-            } else if (currentFilter.type === 'senior') {
-                matchButton = job.includes('معلم أول') || job.includes('منسق');
-            } else if (currentFilter.type === 'disease') {
-                matchButton = hasDisease === true;
-            }
-
-            return matchSearch && matchButton;
-        });
-
-        renderCards(filtered);
-    }
-
-    // دالة إنشاء القائمة المنبثقة عند الوقوف على الأزرار
-    function attachHoverEvents() {
-        document.querySelectorAll('.filters button').forEach(btn => {
-            btn.addEventListener('mouseenter', function(e) {
-                clearTimeout(hideTimeout);
-                
-                const filterType = this.getAttribute('data-type');
-                const filterValue = this.getAttribute('data-value');
-                const btnId = this.id;
-                
-                if(filterType === 'all') return; // لا نظهر قائمة لزر "الكل"
-
-                // جلب بيانات القسم المختار
-                const filtered = allData.filter(row => {
-                    const subject = (row["Subject"] || "");
-                    const type = (row["النوع_المرتب"] || "");
-                    const job = (row["الوظيفة"] || "");
-                    const hasDisease = (row["هل لديك أمراض مزمنة؟"] === "نعم");
-
-                    if (filterType === 'subject') return subject.includes(filterValue);
-                    if (filterType === 'type') return type === filterValue;
-                    if (filterType === 'senior') return job.includes('معلم أول') || job.includes('منسق');
-                    if (filterType === 'disease') return hasDisease;
-                    return true;
-                });
-
-                // تكوين محتوى القائمة
-                const tooltip = document.getElementById('info-tooltip');
-                const namesHTML = filtered.map(r => `<li>${r["اسم المعلم/الموظف باللغة العربية"] || r["TeacherName"] || "بدون اسم"}</li>`).join('');
-
-                const categoryTitle = this.innerText;
-
-                tooltip.innerHTML = `
-                    <div class="tooltip-header">${categoryTitle} <span>العدد: ${filtered.length}</span></div>
-                    <ul class="tooltip-list">${namesHTML || '<li>لا يوجد بيانات</li>'}</ul>
-                    <button class="tooltip-btn" onclick="document.getElementById('${btnId}').click(); document.getElementById('info-tooltip').style.display='none';">عرض جميع التفاصيل للأسماء</button>
-                `;
-
-                // ضبط موقع القائمة أسفل الزر
-                const rect = this.getBoundingClientRect();
-                tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
-                
-                // توسيط القائمة تقريباً مع الزر
-                let leftPos = rect.left + window.scrollX + (rect.width / 2) - 130;
-                if (leftPos < 10) leftPos = 10; // حماية من الخروج عن الشاشة
-                tooltip.style.left = leftPos + 'px';
-
-                tooltip.style.display = 'block';
-            });
-
-            btn.addEventListener('mouseleave', function(e) {
-                hideTimeout = setTimeout(() => {
-                    document.getElementById('info-tooltip').style.display = 'none';
-                }, 300); // تأخير بسيط ليتمكن المستخدم من تحريك الماوس للقائمة
-            });
-        });
-
-        // إبقاء القائمة ظاهرة عند انتقال الماوس إليها وتثبيتها للتمكن من الضغط على الزر
-        document.getElementById('info-tooltip').addEventListener('mouseenter', function() {
-            clearTimeout(hideTimeout);
-        });
-        document.getElementById('info-tooltip').addEventListener('mouseleave', function() {
-            this.style.display = 'none';
         });
     }
     </script>
