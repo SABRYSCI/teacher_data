@@ -1,60 +1,289 @@
-function doGet(e) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  
-  // 1. قراءة ورقة "بيانات" لعمل قاموس (Map) للأقسام والنوع بناءً على الرقم الشخصي
-  var sheetBayanat = ss.getSheetByName("بيانات");
-  var dataBayanat = sheetBayanat.getDataRange().getDisplayValues();
-  var headersBayanat = dataBayanat[0];
-  var cprIndex = headersBayanat.indexOf("CPR");
-  var subjectIndex = headersBayanat.indexOf("Subject");
-  var typeIndex = headersBayanat.indexOf("النوع");
-  
-  var bayanatMap = {};
-  for (var i = 1; i < dataBayanat.length; i++) {
-    var cpr = dataBayanat[i][cprIndex];
-    if (cpr && cpr.trim() !== "") {
-      bayanatMap[cpr.trim()] = {
-        "Subject": subjectIndex > -1 ? dataBayanat[i][subjectIndex] : "",
-        "النوع": typeIndex > -1 ? dataBayanat[i][typeIndex] : ""
-      };
-    }
-  }
-  
-  // 2. قراءة ورقة "Form Responses 1" ودمج البيانات
-  var sheetForm = ss.getSheetByName("Form Responses 1");
-  var dataForm = sheetForm.getDataRange().getDisplayValues();
-  var headersForm = dataForm[0];
-  var jsonData = [];
-  
-  for (var j = 1; j < dataForm.length; j++) {
-    var row = dataForm[j];
-    var obj = {};
-    var currentCpr = "";
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>العاملين بمدرسة البلاد القديم 2026-2027</title>
+    <style>
+        :root { --primary: #1e3a8a; --gold: #d4af37; --bg: #f3f4f6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 0; }
+        
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; color: white; }
+        #login-screen input { padding: 12px; font-size: 18px; text-align: center; border-radius: 8px; border: none; margin-bottom: 15px; width: 250px; outline: none; }
+        #login-screen button { padding: 12px 30px; font-size: 18px; cursor: pointer; border-radius: 8px; border: none; background: var(--gold); color: #fff; font-weight: bold; transition: 0.3s; }
+        #login-screen button:hover { background: #b5952f; }
+        
+        #dashboard { display: none; padding: 20px; max-width: 1200px; margin: auto; position: relative; }
+        .header-img { width: 100%; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px; object-fit: contain; background: white;}
+        .search-container { position: relative; margin-bottom: 20px; }
+        .search-bar { width: 100%; padding: 15px; font-size: 18px; border-radius: 8px; border: 2px solid #ddd; box-sizing: border-box; outline: none; transition: 0.3s;}
+        .search-bar:focus { border-color: var(--gold); }
+        
+        .filters { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 25px; padding: 15px; background: white; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative;}
+        .filters button { padding: 8px 16px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; position: relative; }
+        .filters button:hover, .filters button.active { background: var(--primary); color: white; }
+        .filters button.special { background: var(--gold); color: white; }
+        
+        /* تصميم القائمة المنبثقة (التول تيب) عند الوقوف */
+        #info-tooltip {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            z-index: 100;
+            width: 260px;
+            text-align: right;
+        }
+        .tooltip-header { font-size: 16px; font-weight: bold; color: var(--primary); border-bottom: 2px solid var(--gold); padding-bottom: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        .tooltip-list { list-style: none; padding: 0; margin: 0 0 15px 0; max-height: 200px; overflow-y: auto; font-size: 14px; color: #4b5563; }
+        .tooltip-list li { padding: 5px 0; border-bottom: 1px dashed #f3f4f6; }
+        .tooltip-list li:last-child { border-bottom: none; }
+        .tooltip-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .tooltip-btn:hover { background: #152b69; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 5px solid var(--gold); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+        
+        /* تلوين بطاقات الأمراض المزمنة بلون مميز */
+        .card.chronic-card { background-color: #fef2f2; border-top: 5px solid #ef4444; }
+        
+        .card h3 { margin: 0 0 10px 0; color: var(--primary); font-size: 20px; }
+        .card p { margin: 6px 0; color: #4b5563; font-size: 14px; border-bottom: 1px solid #f3f4f6; padding-bottom: 5px;}
+        .card p:last-child { border-bottom: none; }
+        .card strong { color: #111827; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; color: white; margin-left: 5px; margin-bottom: 10px;}
+        .bg-blue { background: var(--primary); }
+        .bg-gold { background: var(--gold); }
+        .bg-red { background: #ef4444; }
+        
+        #loader { text-align: center; font-size: 20px; font-weight: bold; color: var(--primary); margin-top: 50px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <h1 style="text-align: center; margin-bottom: 10px;">بوابة الموظفين</h1>
+        <h3 style="text-align: center; font-weight: normal; margin-bottom: 30px;">مدرسة البلاد القديم الابتدائية الإعدادية للبنين</h3>
+        <input type="password" id="pass-input" placeholder="أدخل كلمة المرور (2030)">
+        <button onclick="checkPassword()">تسجيل الدخول</button>
+        <p id="error-msg" style="color: #fca5a5; display: none; margin-top: 15px;">كلمة المرور غير صحيحة، حاول مجدداً</p>
+    </div>
+
+    <div id="dashboard">
+        <img src="https://i.postimg.cc/K88X7RLb/trwysyh-dhhbyt.png" alt="ترويسة مدرسة البلاد القديم" class="header-img">
+        
+        <div class="search-container">
+            <input type="text" id="search" class="search-bar" placeholder="ابحث بالحروف الأولى أو أي جزء من اسم الموظف..." onkeyup="filterData()">
+        </div>
+
+        <div class="filters" id="filter-container">
+            <button id="btn-all" data-type="all" data-value="all" class="active" onclick="applyFilter('all', '', this)">الكل</button>
+            <button id="btn-math" data-type="subject" data-value="الرياضيات" onclick="applyFilter('subject', 'الرياضيات', this)">الرياضيات</button>
+            <button id="btn-sci" data-type="subject" data-value="العلوم" onclick="applyFilter('subject', 'العلوم', this)">العلوم</button>
+            <button id="btn-eng" data-type="subject" data-value="اللغة الإنجليزية" onclick="applyFilter('subject', 'اللغة الإنجليزية', this)">الإنجليزي</button>
+            <button id="btn-ara" data-type="subject" data-value="اللغة العربية" onclick="applyFilter('subject', 'اللغة العربية', this)">العربي</button>
+            <button id="btn-isl" data-type="subject" data-value="التربية الإسلامية" onclick="applyFilter('subject', 'التربية الإسلامية', this)">إسلاميات</button>
+            <button id="btn-prac" data-type="subject" data-value="المجالات العملية" onclick="applyFilter('subject', 'المجالات العملية', this)">المجالات</button>
+            <button id="btn-soc" data-type="subject" data-value="المواد الاجتماعية" onclick="applyFilter('subject', 'المواد الاجتماعية', this)">اجتماعيات</button>
+            <button id="btn-pe" data-type="subject" data-value="التربية الرياضية" onclick="applyFilter('subject', 'التربية الرياضية', this)">الرياضة</button>
+            <button id="btn-spec" data-type="subject" data-value="تربية خاصة" onclick="applyFilter('subject', 'تربية خاصة', this)">تربية خاصة</button>
+            <button id="btn-admin" data-type="subject" data-value="مدير" onclick="applyFilter('subject', 'مدير', this)">الإدارة المدرسية</button>
+            <button id="btn-senior" data-type="senior" data-value="معلم أول" onclick="applyFilter('senior', 'معلم أول', this)" class="special">المعلمين الأوائل</button>
+            <button id="btn-bah" data-type="type" data-value="بحريني" onclick="applyFilter('type', 'بحريني', this)" class="special">البحرينيين</button>
+            <button id="btn-exp" data-type="type" data-value="وافد" onclick="applyFilter('type', 'وافد', this)" class="special">الوافدين</button>
+            <button id="btn-dis" data-type="disease" data-value="نعم" onclick="applyFilter('disease', 'نعم', this)" class="special">الأمراض المزمنة</button>
+        </div>
+
+        <!-- أداة التلميح (النافذة المنبثقة عند الوقوف) -->
+        <div id="info-tooltip"></div>
+
+        <div id="loader">جاري تحميل وتحديث البيانات...</div>
+        <div id="cards-container" class="cards-grid"></div>
+    </div>
+
+    <script>
+    // الرابط الوزاري الخاص بك
+    const API_URL = "https://script.google.com/macros/s/AKfycbzN7GQkCewxmCiPM5s6Hk3V5KZF1hR07CIHm6KGpF6XO-H5c2_Bc7kGBQ4Rzg13SV_I/exec"; 
     
-    // تحويل الصف إلى كائن (Object)
-    for (var k = 0; k < headersForm.length; k++) {
-      var headerName = headersForm[k].trim();
-      obj[headerName] = row[k];
-      if (headerName === "الرقم الشخصي") {
-        currentCpr = row[k].trim();
-      }
+    let allData = [];
+    let currentFilter = { type: 'all', value: '' };
+    let hideTimeout; // للتحكم في اختفاء القائمة
+
+    function checkPassword() {
+        const pass = document.getElementById("pass-input").value;
+        if (pass === "2030") {
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("dashboard").style.display = "block";
+            fetchData();
+        } else {
+            document.getElementById("error-msg").style.display = "block";
+        }
     }
-    
-    // إذا كان الصف يحتوي على رقم شخصي، نقوم بدمج البيانات
-    if (currentCpr !== "") {
-      if (bayanatMap[currentCpr]) {
-        // أخذ المادة والنوع من ورقة "بيانات"
-        obj["Subject"] = bayanatMap[currentCpr]["Subject"];
-        obj["النوع_المرتب"] = bayanatMap[currentCpr]["النوع"]; 
-      } else {
-        // في حال لم يضاف المعلم لورقة بيانات، نضع قيماً افتراضية
-        obj["Subject"] = "غير محدد";
-        obj["النوع_المرتب"] = obj["نوع التعاقد"] === "دائم" ? "بحريني" : "وافد";
-      }
-      jsonData.push(obj);
+
+    async function fetchData() {
+        try {
+            const response = await fetch(API_URL, { method: "GET", redirect: "follow" });
+            allData = await response.json();
+            document.getElementById("loader").style.display = "none";
+            renderCards(allData);
+            attachHoverEvents(); // تفعيل ميزة الوقوف على الأزرار بعد جلب البيانات
+        } catch (error) {
+            document.getElementById("loader").innerText = "حدث خطأ في تحميل البيانات.";
+            console.error(error);
+        }
     }
-  }
-  
-  return ContentService.createTextOutput(JSON.stringify(jsonData))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+
+    function renderCards(data) {
+        const container = document.getElementById("cards-container");
+        container.innerHTML = "";
+        
+        data.forEach(row => {
+            const name = row["اسم المعلم/الموظف باللغة العربية"] || row["TeacherName"] || "بدون اسم";
+            const cpr = row["الرقم الشخصي"] || "-";
+            const subject = row["Subject"] || "غير محدد"; 
+            const type = row["النوع_المرتب"] || ""; 
+            const job = row["الوظيفة"] || "-";
+            const email = row["البريد الإلكتروني الوزاري"] || "-";
+            const phone = row["رقم الاتصال"] || "-";
+            const degree = row["المؤهل الأكاديمي"] || "-";
+            
+            // إصلاح مشكلة الأمراض المزمنة
+            const hasDiseaseRaw = row["هل لديك أمراض مزمنة؟"];
+            const hasDisease = (hasDiseaseRaw && hasDiseaseRaw.trim() === "نعم") ? true : false;
+            const diseaseDetails = row["ما هو المرض مزمن"] || row["ماهو المرض المزمن؟"] || "";
+
+            const card = document.createElement("div");
+            
+            // إضافة كلاس خاص لتمييز بطاقات المرضى بلون خفيف
+            card.className = hasDisease ? "card chronic-card" : "card";
+            
+            let badgesHTML = `<span class="badge bg-blue">${subject}</span>`;
+            if(type === "بحريني") badgesHTML += `<span class="badge bg-gold">بحريني</span>`;
+            if(type === "وافد") badgesHTML += `<span class="badge bg-gold">وافد</span>`;
+            if(hasDisease) badgesHTML += `<span class="badge bg-red">أمراض مزمنة</span>`;
+
+            card.innerHTML = `
+                ${badgesHTML}
+                <h3>${name}</h3>
+                <p><strong>الوظيفة:</strong> ${job}</p>
+                <p><strong>الرقم الشخصي:</strong> ${cpr}</p>
+                <p><strong>رقم الاتصال:</strong> ${phone}</p>
+                <p><strong>البريد الوزاري:</strong> ${email}</p>
+                <p><strong>المؤهل:</strong> ${degree}</p>
+                ${hasDisease ? `<p style="color:#dc2626;"><strong>تفاصيل المرض:</strong> ${diseaseDetails}</p>` : ''}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function applyFilter(filterType, filterValue, btnElement) {
+        document.querySelectorAll('.filters button').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+        
+        currentFilter = { type: filterType, value: filterValue };
+        filterData(); 
+    }
+
+    function filterData() {
+        const searchTerm = document.getElementById("search").value.toLowerCase();
+        
+        const filtered = allData.filter(row => {
+            const name = (row["اسم المعلم/الموظف باللغة العربية"] || row["TeacherName"] || "").toLowerCase();
+            const subject = (row["Subject"] || "");
+            const type = (row["النوع_المرتب"] || "");
+            const job = (row["الوظيفة"] || "");
+            
+            const hasDiseaseRaw = row["هل لديك أمراض مزمنة؟"];
+            const hasDisease = (hasDiseaseRaw && hasDiseaseRaw.trim() === "نعم");
+            
+            const matchSearch = name.includes(searchTerm);
+            
+            let matchButton = true;
+            if (currentFilter.type === 'subject') {
+                matchButton = subject.includes(currentFilter.value);
+            } else if (currentFilter.type === 'type') {
+                matchButton = type === currentFilter.value;
+            } else if (currentFilter.type === 'senior') {
+                matchButton = job.includes('معلم أول') || job.includes('منسق');
+            } else if (currentFilter.type === 'disease') {
+                matchButton = hasDisease === true;
+            }
+
+            return matchSearch && matchButton;
+        });
+
+        renderCards(filtered);
+    }
+
+    // دالة إنشاء القائمة المنبثقة عند الوقوف على الأزرار
+    function attachHoverEvents() {
+        document.querySelectorAll('.filters button').forEach(btn => {
+            btn.addEventListener('mouseenter', function(e) {
+                clearTimeout(hideTimeout);
+                
+                const filterType = this.getAttribute('data-type');
+                const filterValue = this.getAttribute('data-value');
+                const btnId = this.id;
+                
+                if(filterType === 'all') return; // لا نظهر قائمة لزر "الكل"
+
+                // جلب بيانات القسم المختار
+                const filtered = allData.filter(row => {
+                    const subject = (row["Subject"] || "");
+                    const type = (row["النوع_المرتب"] || "");
+                    const job = (row["الوظيفة"] || "");
+                    const hasDisease = (row["هل لديك أمراض مزمنة؟"] === "نعم");
+
+                    if (filterType === 'subject') return subject.includes(filterValue);
+                    if (filterType === 'type') return type === filterValue;
+                    if (filterType === 'senior') return job.includes('معلم أول') || job.includes('منسق');
+                    if (filterType === 'disease') return hasDisease;
+                    return true;
+                });
+
+                // تكوين محتوى القائمة
+                const tooltip = document.getElementById('info-tooltip');
+                const namesHTML = filtered.map(r => `<li>${r["اسم المعلم/الموظف باللغة العربية"] || r["TeacherName"] || "بدون اسم"}</li>`).join('');
+
+                const categoryTitle = this.innerText;
+
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">${categoryTitle} <span>العدد: ${filtered.length}</span></div>
+                    <ul class="tooltip-list">${namesHTML || '<li>لا يوجد بيانات</li>'}</ul>
+                    <button class="tooltip-btn" onclick="document.getElementById('${btnId}').click(); document.getElementById('info-tooltip').style.display='none';">عرض جميع التفاصيل للأسماء</button>
+                `;
+
+                // ضبط موقع القائمة أسفل الزر
+                const rect = this.getBoundingClientRect();
+                tooltip.style.top = (rect.bottom + window.scrollY + 5) + 'px';
+                
+                // توسيط القائمة تقريباً مع الزر
+                let leftPos = rect.left + window.scrollX + (rect.width / 2) - 130;
+                if (leftPos < 10) leftPos = 10; // حماية من الخروج عن الشاشة
+                tooltip.style.left = leftPos + 'px';
+
+                tooltip.style.display = 'block';
+            });
+
+            btn.addEventListener('mouseleave', function(e) {
+                hideTimeout = setTimeout(() => {
+                    document.getElementById('info-tooltip').style.display = 'none';
+                }, 300); // تأخير بسيط ليتمكن المستخدم من تحريك الماوس للقائمة
+            });
+        });
+
+        // إبقاء القائمة ظاهرة عند انتقال الماوس إليها وتثبيتها للتمكن من الضغط على الزر
+        document.getElementById('info-tooltip').addEventListener('mouseenter', function() {
+            clearTimeout(hideTimeout);
+        });
+        document.getElementById('info-tooltip').addEventListener('mouseleave', function() {
+            this.style.display = 'none';
+        });
+    }
+    </script>
+</body>
+</html>
